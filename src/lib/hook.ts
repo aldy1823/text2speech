@@ -93,7 +93,6 @@ export function useHoveredParagraphCoordinate(
 
   useEffect(() => {
     window.addEventListener("mouseover", hoverListener);
-
     return () => {
       window.removeEventListener("mouseover", hoverListener);
     };
