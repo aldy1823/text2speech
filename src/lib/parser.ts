@@ -23,7 +23,7 @@ const IGNORE_LIST = [
  *  Start Parsing inside the body element of the HTMLPage.
  *  A top level readable element is defined as follows:
  *      1. The text node contained in the element should not be empty
- *      2. The element should not be in the ignore list (also referred as the block list)
+ *      2. The element should not be in the ignore list
  *      3. The element should not be a child of another element that has only one child.
  *            For example: <div><blockquote>Some text here</blockquote></div>. div is the top level readable element and not blockquote
  *      4. A top level readable element should not contain another top level readable element.
@@ -44,4 +44,37 @@ const IGNORE_LIST = [
  *            </body>;
  *            In this case, #content-1 should not be considered as a top level readable element.
  */
-export function getTopLevelReadableElementsOnPage(): HTMLElement[] {}
+
+export function getTopLevelReadableElementsOnPage(): Element[] {
+  const topLevelReadableElements: Element[] = [];
+  const isTopLevel = (element: Element) => {
+    return Boolean(
+      !IGNORE_LIST.includes(element.tagName) &&
+        element.childElementCount <= 1 &&
+        element.textContent,
+    );
+  };
+
+  function recursiveChildElements(element: Element) {
+    if (
+      element.childElementCount > 0 &&
+      (element.childElementCount > 1 || !isTopLevel(element.firstElementChild!))
+    ) {
+      for (const child of element!.children) {
+        recursiveChildElements(child);
+      }
+      return;
+    }
+    if (
+      !IGNORE_LIST.includes(element.tagName) &&
+      element.childElementCount <= 1 &&
+      element.textContent
+    ) {
+      topLevelReadableElements.push(element);
+    }
+  }
+  const myElement = document.getElementsByTagName("body");
+
+  recursiveChildElements(myElement[0]!);
+  return topLevelReadableElements;
+}
